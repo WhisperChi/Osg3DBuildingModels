@@ -110,7 +110,7 @@ void Xc3DCity::removeNode(osg::Switch* area)
 Xc3DCityHandler::Xc3DCityHandler(osg::Switch* group)
 		:	_group(group)
 {
-		
+    _flag = 0;
 }
 
 Xc3DCityHandler::~Xc3DCityHandler()
@@ -133,9 +133,38 @@ bool Xc3DCityHandler::handle( const osgGA::GUIEventAdapter& ea,
 		{
 			if(ea.getKey() == osgGA::GUIEventAdapter::KEY_C)
 			{
-				osgEarth::Viewpoint vp("",121.922f,30.8864f,0.0f,57.8275f,-16.3616,5824.4f);	
-                ( (osgEarth::Util::EarthManipulator*)(viewer->getCameraManipulator()) )->setViewpoint(vp,3.0f);
-			}
+                switch(_flag)
+                {
+                case 0:
+                {
+                    osgEarth::Viewpoint vp("",121.922f,30.8864f,0.0f,57.8275f,-16.3616,5824.4f);
+                    ( (osgEarth::Util::EarthManipulator*)(viewer->getCameraManipulator()) )->setViewpoint(vp,3.0f);
+                    _flag++;
+                }
+                    break;
+               case 1:
+                {
+                    osgEarth::Viewpoint vp("",141.922f,30.8864f,0.0f,57.8275f,-16.3616,5824.4f);
+                    ( (osgEarth::Util::EarthManipulator*)(viewer->getCameraManipulator()) )->setViewpoint(vp,3.0f);
+                    _flag++;
+                }
+                    break;
+                case 2:
+                {
+                    osgEarth::Viewpoint vp("",111.922f,30.8864f,0.0f,57.8275f,-16.3616,5824.4f);
+                    ( (osgEarth::Util::EarthManipulator*)(viewer->getCameraManipulator()) )->setViewpoint(vp,3.0f);
+                    _flag++;
+                }
+                    break;
+                default:
+                {
+                    osgEarth::Viewpoint vp("",101.922f,30.8864f,0.0f,57.8275f,-16.3616,5824.4f);
+                    ( (osgEarth::Util::EarthManipulator*)(viewer->getCameraManipulator()) )->setViewpoint(vp,3.0f);
+                    _flag = 0;
+                }
+                    break;
+                }//end Switch
+            }//end key_c
 		}
 			break;
 		default:
