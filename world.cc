@@ -80,14 +80,14 @@ main(int argc, char** argv)
     osg::ref_ptr<osgEarth::MapNode>  			  		  mapNode = new osgEarth::MapNode(map);
 	osg::ref_ptr<osgViewer::CompositeViewer>   comViewer = new osgViewer::CompositeViewer();
 
-	comViewer->addView(&viewer);
+    comViewer->addView(&viewer);
 
     //Load Data
     osgEarth::Drivers::GDALOptions gdal;
     gdal.url() = "./resource/world.tif";
 
     ImageLayer* baseLayer = new ImageLayer("baseLayer",gdal);
-    map->addImageLayer(baseLayer);
+    mapNode->getMap()->addImageLayer(baseLayer);
 
 	root->addChild(node);
 	root->addChild(mapNode);
@@ -103,7 +103,7 @@ main(int argc, char** argv)
         viewer.getCamera()->setNearFarRatio(0.00002);
         viewer.getCamera()->setSmallFeatureCullingPixelSize(-1.0f);
 
-        return viewer.run();
+        return comViewer->run();
     }
     else
     {
