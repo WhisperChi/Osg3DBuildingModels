@@ -75,12 +75,19 @@ main(int argc, char** argv)
     // and earth file <external> tags    
     osg::Node* node = MapNodeHelper().load( arguments, &viewer );
 
-	osg::ref_ptr<osg::Group>						root = new osg::Group();
-	osg::ref_ptr<osgEarth::Map>						 map = new osgEarth::Map();
-	osg::ref_ptr<osgEarth::MapNode>  			 mapNode = new osgEarth::MapNode(map);
+    osg::ref_ptr<osg::Group>										 	   root = new osg::Group();
+    osg::ref_ptr<osgEarth::Map>						               map = new osgEarth::Map();
+    osg::ref_ptr<osgEarth::MapNode>  			  		  mapNode = new osgEarth::MapNode(map);
 	osg::ref_ptr<osgViewer::CompositeViewer>   comViewer = new osgViewer::CompositeViewer();
-	
+
 	comViewer->addView(&viewer);
+
+    //Load Data
+    osgEarth::Drivers::GDALOptions gdal;
+    gdal.url() = "./resource/world.tif";
+
+    ImageLayer* baseLayer = new ImageLayer("baseLayer",gdal);
+    map->addImageLayer(baseLayer);
 
 	root->addChild(node);
 	root->addChild(mapNode);
@@ -91,7 +98,7 @@ main(int argc, char** argv)
 
     if ( root ) 
     {
-        viewer.setSceneData( node );
+        viewer.setSceneData( root );
 
         viewer.getCamera()->setNearFarRatio(0.00002);
         viewer.getCamera()->setSmallFeatureCullingPixelSize(-1.0f);
