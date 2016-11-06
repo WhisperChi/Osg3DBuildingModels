@@ -103,17 +103,22 @@ public:
 	~Xc3DCityHandler();
 
 	virtual bool handle( const osgGA::GUIEventAdapter& ea,
-							   osgGA::GUIActionAdapter& aa,
-							   osg::Object*	ob,
-							   osg::NodeVisitor* nv);
+                                                 osgGA::GUIActionAdapter& aa,
+                                                 osg::Object*	ob,
+                                                 osg::NodeVisitor* nv);
 
 private:
 	osg::Group* _group;
+    int 				  _flag;
 
 };
 
+class Xc3DCityThread	:	public OpenThreads::Thread
+{
+private:
+    OpenThreads::Mutex		_threadMutex;
 
-
+};
 
 
 
