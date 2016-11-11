@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <osg/Geometry>
+#include <osgEarth/MapNode>
 
 typedef struct _coords
 {
@@ -20,21 +21,24 @@ typedef struct _coords
 
 }Coords;
 
+typedef std::vector< std::vector<Coords> > BuildingsData;
+
+///
+/// \brief The DataHandle class
+/// Create LODs and add into a switch node
+///
 class DataHandle
 {
 public:
-    DataHandle();
-    DataHandle(std::string url);
+    DataHandle(osgEarth::MapNode* mapNode,std::string url);
     ~DataHandle();
 
-    void setUrl(std::string url);
-    std::string url();
-
-    int data(std::vector<std::vector<Coords> >& buildingdas);
+    void addDataIntoGroup(osg::Switch* group);
 
 private:
-    std::string                                         _url;
-
+    osgEarth::MapNode*                       _mapNode;
+    std::string                                           _url;
+    std::vector<osg::LOD*>                    _buildings;
 };
 
 

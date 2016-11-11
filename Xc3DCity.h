@@ -50,31 +50,19 @@ using namespace osgEarth::Features;
 using namespace osgEarth::Util;
 using namespace osgEarth::Util::Controls;
 
-typedef struct _coords
-{
-	double lon;
-	double lat;
-	double alt;
-	_coords(double x,double y,double z)
-		:	lon(x),
-			lat(y),
-			alt(z)
-	{
-
-	}
-
-}Coords;
+#include "DataHandle.h"
 
 struct SafeXc3DCityOperation;
 
-/*
- * Function: 安全增删队列里面的内容
- * */
+///
+/// \brief The Xc3DCity class
+///  Add or delete safely
+///
 class Xc3DCity 
 {
 
 public:
-	Xc3DCity(osgViewer::CompositeViewer* viewer,osg::Switch* group);	
+    Xc3DCity(osgViewer::CompositeViewer* viewer,osg::Switch* group);
 	~Xc3DCity();
 
     
@@ -85,7 +73,7 @@ protected:
 
 private:
 	osgViewer::CompositeViewer*				_viewer;
-	osg::Switch*							_group;
+    osg::Switch*							                _group;
 
 	std::vector<osg::Switch*>				_safeAddNodes;
 	std::vector<osg::Switch*>				_safeRemoveNodes;
@@ -95,12 +83,16 @@ private:
 	SafeXc3DCityOperation*					_cityOperation;
 };
 
+///
+/// \brief The Xc3DCityHandler class
+/// Mouse and keyboard event
+///
 class Xc3DCityHandler:public osgGA::GUIEventHandler
 {
 
 public:
 	Xc3DCityHandler(osg::Switch* group);	
-	~Xc3DCityHandler();
+    ~Xc3DCityHandler();
 
 	virtual bool handle( const osgGA::GUIEventAdapter& ea,
                                                  osgGA::GUIActionAdapter& aa,
@@ -113,11 +105,33 @@ private:
 
 };
 
+
 class Xc3DCityThread	:	public OpenThreads::Thread
 {
+public:
+
+    static Xc3DCityThread* Instance()
+    {
+         static Xc3DCityThread s_thread;
+         return &s_thread;
+    }
+    virtual void run();
+    virtual int cancel();
+
+    void setCityObject(Xc3DCity* city);
+
+    //osg::LOD* createGeometry(osgEarth::MapNode* mapNode,const std::vector<Coords>& buildings);
+
+
+
+
+
 private:
     OpenThreads::Mutex		_threadMutex;
+    bool                                    _done;
+    bool                                    _dirty;
 
+    Xc3DCity*                           _city;
 };
 
 

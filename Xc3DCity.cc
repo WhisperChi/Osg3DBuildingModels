@@ -35,14 +35,7 @@
 
 #include <osgEarth/Pickers>
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <iostream>
+
 
 using namespace osgEarth;
 using namespace osgEarth::Annotation;
@@ -50,48 +43,10 @@ using namespace osgEarth::Features;
 using namespace osgEarth::Util;
 using namespace osgEarth::Util::Controls;
 
-///
-/// \brief myTree
-/// \param dir
-/// \param files
-/// \return
-///
-int myTree(const std::string dir,std::vector<std::string>& files)
-{
-    DIR              *pDir ;
-    struct dirent    *ent  ;
-    int               i=0  ;
-    char              childpath[512];
 
-    pDir=opendir(dir.c_str());
-    memset(childpath,0,sizeof(childpath));
+#include <stdlib.h>
+#include <stdio.h>
 
-
-    while((ent=readdir(pDir))!=NULL)
-    {
-        if(ent->d_type & DT_DIR)
-        {
-
-        if(strcmp(ent->d_name,".")==0 || strcmp(ent->d_name,"..")==0)
-            continue;
-
-            sprintf(childpath,"%s/%s",path,ent->d_name);
-            printf("path:%s/n",childpath);
-
-            listDir(childpath)  ;
-
-         }
-         else
-         {
-                std::cout<<ent->d_name<<std::endl;
-                std::string tmp(ent->d_name);
-                files.push_back(tmp);
-         }
-     }
-
-
-    return 0;
-}
 
 /*
  * Function: 安全更新 Xc3DCity 类
@@ -175,16 +130,16 @@ bool Xc3DCityHandler::handle( const osgGA::GUIEventAdapter& ea,
 									osg::Object* ob,
 									osg::NodeVisitor* nv)
 {
-	osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
-	if(!viewer)
-		return false;
+    osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
+    if(!viewer)
+        return false;
 	
-	switch( ea.getEventType() )
-	{
-		case osgGA::GUIEventAdapter::KEYDOWN:
-		{
-			if(ea.getKey() == osgGA::GUIEventAdapter::KEY_C)
-			{
+    switch( ea.getEventType() )
+    {
+        case osgGA::GUIEventAdapter::KEYDOWN:
+        {
+            if(ea.getKey() == osgGA::GUIEventAdapter::KEY_C)
+            {
                 switch(_flag)
                 {
                 case 0:
@@ -217,13 +172,71 @@ bool Xc3DCityHandler::handle( const osgGA::GUIEventAdapter& ea,
                     break;
                 }//end Switch
             }//end key_c
-		}
-			break;
-		default:
-			break;
-			return true;
-	}
+        }
+            break;
+        default:
+            break;
+            return true;
+    }
 
 }
 
+/******************Xc3DCityThread********************/
 
+void Xc3DCityThread::run()
+{
+    _done = false;
+    _dirty = true;
+    do
+    {
+
+
+    }while(!_done);
+
+}
+
+int Xc3DCityThread::cancel()
+{
+    _done = true;
+    while( isRunning() )
+        YieldCurrentThread();
+
+    return 0;
+}
+
+void Xc3DCityThread::setCityObject(Xc3DCity *city)
+{
+    _city = city;
+}
+
+//osg::LOD *Xc3DCityThread::createGeometry(osgEarth::MapNode* mapNode,std::vector<Coords>& buildings)
+//{
+//    if(buildings.size() == 0)
+//        return NULL;
+
+//    osg::ref_ptr<osg::LOD>     lodNode = new osg::LOD();
+
+//    osgEarth::Symbology::Geometry*   geom = new osgEarth::Symbology::Polygon();
+//    osgEarth::Symbology::Style      geomStyle;
+//    const SpatialReference* geoSRS = mapNode->getMapSRS()->getGeographicSRS();
+
+//    //rand Height
+//    int h = rand()%100 + 20;
+//    double alt = osg::PI * h;
+
+//    for(unsigned int i = 0;i < buildings.size();i++)
+//        geom->push_back(buildings[i],buildings[i]->lat,0.0);
+
+//    geomStyle.getOrCreate<LineSymbol>()->stroke()->color() = osgEarth::Symbology::Color::White;
+//    geomStyle.getOrCreate<LineSymbol>()->stroke()->width() = 2.0f;
+//    geomStyle.getOrCreate<ExtrusionSymbol>()->height() = alt;
+//    geomStyle.getOrCreate<PolygonSymbol>()->fill()->color() = Color(Color::White,0.6);
+
+//    osgEarth::Annotation::FeatureNode* node =  new osgEarth::Annotation::FeatureNode(
+//                        mapNode,
+//                        new osgEarth::Features::Feature(geom,geoSRS,geomStyle)
+//                        );
+
+//    lodNode->addChild(node);
+//    return lodNode;
+//}
