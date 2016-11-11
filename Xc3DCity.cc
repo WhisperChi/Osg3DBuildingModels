@@ -76,6 +76,7 @@ int parserJson(std::string fileName,std::vector<std::vector<Coords>>& buildings)
         if( reader.parse(in,root) )
         {
             Json::Value arr = root["features"];
+            std::cout<< "arr size" << arr.size() << std::endl;
             for(unsigned int i = 0; i < arr.size();i++)
             {
                 Json::Value coordsArr = arr[i]["geometry"]["coordinates"][0];
@@ -121,14 +122,20 @@ void listDir(const char *path,std::vector<std::string>& a)
             if(strcmp(ent->d_name,".")==0 || strcmp(ent->d_name,"..")==0)
                 continue;
 
-            sprintf(childpath,"%s/%s",path,ent->d_name);
+            std::string b(path);
+            std::string c(ent->d_name);
+            std::string res =b + c;
+            childpath = res.c_str();
 
             listDir(childpath,a);
 
         }
         else
         {
-            a.push_back(std::string(ent->d_name));
+            std::string b(path);
+            std::string c(ent->d_name);
+            std::string res =b + c;
+            a.push_back(res);
         }
     }
 
@@ -279,16 +286,22 @@ void Xc3DCityThread::run()
     {
         std::vector<std::string>    files;
         listDir(_url.c_str(),files);
-
-        std::vector<std::vector<Coords>> buildings;
-        parserJson(_url,buildings);
+        std::cout << "files num:" << files.size() << std::endl;
 
         osg::Switch* area = new osg::Switch();
-        for(unsigned int i = 0;i < buildings.size();i++)
+        for(unsigned int i = 0;i < files.size();i++)
         {
-            osg::LOD* tmp = createGeometry(_mapNode,buildings[i]);
-            area->addChild(tmp);
+            std::vector<std::vector<Coords>> buildings;
+            //std::cout << "file name:" << files[i] << std::endl;
+            parserJson(files[i],buildings);
+            //std::cout << "buildings num:" << buildings.size() << std::endl;
+            for(unsigned int j = 0;j < buildings.size();j++)
+            {
+                osg::LOD* tmp = createGeometry(_mapNode,buildings[j]);
+                area->addChild(tmp);
+            }
         }
+        std::cout << area->getNumChildren() << std::endl;
 
         _city->addNode(area);
         _done = true;
