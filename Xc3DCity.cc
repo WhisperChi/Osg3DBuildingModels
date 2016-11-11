@@ -43,9 +43,15 @@ using namespace osgEarth::Features;
 using namespace osgEarth::Util;
 using namespace osgEarth::Util::Controls;
 
-
-#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <iostream>
+#include <vector>
 
 #include "json/json.h"
 
@@ -89,6 +95,43 @@ int parserJson(std::string fileName,std::vector<std::vector<Coords>>& buildings)
     }//End Parser
 
     return 0;
+}
+
+///
+/// \brief listDir
+/// \param path
+/// \param a
+///
+void listDir(const char *path,std::vector<std::string>& a)
+{
+    DIR              *pDir ;
+    struct dirent    *ent  ;
+    int               i=0  ;
+    char              childpath[512];
+
+    pDir=opendir(path);
+    memset(childpath,0,sizeof(childpath));
+
+    while((ent=readdir(pDir))!=NULL)
+    {
+
+        if(ent->d_type & DT_DIR)
+        {
+
+            if(strcmp(ent->d_name,".")==0 || strcmp(ent->d_name,"..")==0)
+                continue;
+
+            sprintf(childpath,"%s/%s",path,ent->d_name);
+
+            listDir(childpath,a);
+
+        }
+        else
+        {
+            a.push_back(std::string(ent->d_name));
+        }
+    }
+
 }
 
 
@@ -234,6 +277,9 @@ void Xc3DCityThread::run()
     _dirty = true;
     do
     {
+        std::vector<std::string>    files;
+        listDir(_url.c_str(),files);
+
         std::vector<std::vector<Coords>> buildings;
         parserJson(_url,buildings);
 
@@ -245,6 +291,7 @@ void Xc3DCityThread::run()
         }
 
         _city->addNode(area);
+        _done = true;
 
     }while(!_done);
 }
