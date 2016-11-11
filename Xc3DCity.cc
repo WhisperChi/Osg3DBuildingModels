@@ -47,6 +47,50 @@ using namespace osgEarth::Util::Controls;
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "json/json.h"
+
+
+///
+/// \brief parserJson
+/// \param fileName
+/// \param buildings
+/// \return
+///
+int parserJson(std::string fileName,std::vector<std::vector<Coords>>& buildings)
+{
+    std::ifstream in(fileName.c_str(),std::ios::binary);
+    if( !in.is_open() )
+        return 1;
+
+    //Json Parser
+    {
+        Json::Reader reader;
+        Json::Value    root;
+
+        if( reader.parse(in,root) )
+        {
+            Json::Value arr = root["features"];
+            for(unsigned int i = 0; i < arr.size();i++)
+            {
+                Json::Value coordsArr = arr[i]["geometry"]["coordinates"][0];
+                std::vector<Coords> building;
+                building.clear();
+                for(unsigned int j = 0; j < coordsArr.size();j++)
+                {
+                    double lon,lat;
+                    lon = coordsArr[j][0].asDouble();
+                    lat  = coordsArr[j][1].asDouble();
+                    Coords tmp(lon,lat,0.0);
+                    building.push_back(tmp);
+                }
+                buildings.push_back(building);
+            }
+        }
+    }//End Parser
+
+    return 0;
+}
+
 
 /*
  * Function: 安全更新 Xc3DCity 类
@@ -98,7 +142,6 @@ void Xc3DCity::addNode(osg::Switch* area)
 		return ;
 
 	_safeAddNodes.push_back(area);
-	
 }
 
 void Xc3DCity::removeNode(osg::Switch* area)
@@ -181,7 +224,9 @@ bool Xc3DCityHandler::handle( const osgGA::GUIEventAdapter& ea,
 
 }
 
-/******************Xc3DCityThread********************/
+/*
+ *  Xc3DCityThread
+*/
 
 void Xc3DCityThread::run()
 {
@@ -189,10 +234,19 @@ void Xc3DCityThread::run()
     _dirty = true;
     do
     {
+        std::vector<std::vector<Coords>> buildings;
+        parserJson(_url,buildings);
 
+        osg::Switch* area = new osg::Switch();
+        for(unsigned int i = 0;i < buildings.size();i++)
+        {
+            osg::LOD* tmp = createGeometry(_mapNode,buildings[i]);
+            area->addChild(tmp);
+        }
+
+        _city->addNode(area);
 
     }while(!_done);
-
 }
 
 int Xc3DCityThread::cancel()
@@ -204,39 +258,41 @@ int Xc3DCityThread::cancel()
     return 0;
 }
 
-void Xc3DCityThread::setCityObject(Xc3DCity *city)
+void Xc3DCityThread::setCityObject(Xc3DCity *city,osgEarth::MapNode* mapNode,std::string url)
 {
     _city = city;
+    _mapNode = mapNode;
+    _url = url;
 }
 
-//osg::LOD *Xc3DCityThread::createGeometry(osgEarth::MapNode* mapNode,std::vector<Coords>& buildings)
-//{
-//    if(buildings.size() == 0)
-//        return NULL;
+osg::LOD *Xc3DCityThread::createGeometry(osgEarth::MapNode* mapNode,const std::vector<Coords>& buildings)
+{
+    if(buildings.size() == 0)
+        return NULL;
 
-//    osg::ref_ptr<osg::LOD>     lodNode = new osg::LOD();
+    osg::ref_ptr<osg::LOD>     lodNode = new osg::LOD();
 
-//    osgEarth::Symbology::Geometry*   geom = new osgEarth::Symbology::Polygon();
-//    osgEarth::Symbology::Style      geomStyle;
-//    const SpatialReference* geoSRS = mapNode->getMapSRS()->getGeographicSRS();
+    osgEarth::Symbology::Geometry*   geom = new osgEarth::Symbology::Polygon();
+    osgEarth::Symbology::Style      geomStyle;
+    const SpatialReference* geoSRS = mapNode->getMapSRS()->getGeographicSRS();
 
-//    //rand Height
-//    int h = rand()%100 + 20;
-//    double alt = osg::PI * h;
+    //rand Height
+    int h = rand()%100 + 20;
+    double alt = osg::PI * h;
 
-//    for(unsigned int i = 0;i < buildings.size();i++)
-//        geom->push_back(buildings[i],buildings[i]->lat,0.0);
+    for(unsigned int i = 0;i < buildings.size();i++)
+        geom->push_back(buildings[i].lon,buildings[i].lat,0.0);
 
-//    geomStyle.getOrCreate<LineSymbol>()->stroke()->color() = osgEarth::Symbology::Color::White;
-//    geomStyle.getOrCreate<LineSymbol>()->stroke()->width() = 2.0f;
-//    geomStyle.getOrCreate<ExtrusionSymbol>()->height() = alt;
-//    geomStyle.getOrCreate<PolygonSymbol>()->fill()->color() = Color(Color::White,0.6);
+    geomStyle.getOrCreate<LineSymbol>()->stroke()->color() = osgEarth::Symbology::Color::White;
+    geomStyle.getOrCreate<LineSymbol>()->stroke()->width() = 2.0f;
+    geomStyle.getOrCreate<ExtrusionSymbol>()->height() = alt;
+    geomStyle.getOrCreate<PolygonSymbol>()->fill()->color() = Color(Color::White,0.6);
 
-//    osgEarth::Annotation::FeatureNode* node =  new osgEarth::Annotation::FeatureNode(
-//                        mapNode,
-//                        new osgEarth::Features::Feature(geom,geoSRS,geomStyle)
-//                        );
+    osgEarth::Annotation::FeatureNode* node =  new osgEarth::Annotation::FeatureNode(
+                        mapNode,
+                        new osgEarth::Features::Feature(geom,geoSRS,geomStyle)
+                        );
 
-//    lodNode->addChild(node);
-//    return lodNode;
-//}
+    lodNode->addChild(node);
+    return lodNode;
+}

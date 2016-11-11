@@ -33,11 +33,9 @@ LIBS= 	\
 SOURCES += \
     world.cc \
     Xc3DCity.cc \
-    jsoncpp.cpp \
-    DataHandle.cpp
+    jsoncpp.cpp
 
 HEADERS += \
     Xc3DCity.h \
     json/json.h \
-    json/json-forwards.h \
-    DataHandle.h
+    json/json-forwards.h

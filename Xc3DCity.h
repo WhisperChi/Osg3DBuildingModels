@@ -50,7 +50,22 @@ using namespace osgEarth::Features;
 using namespace osgEarth::Util;
 using namespace osgEarth::Util::Controls;
 
-#include "DataHandle.h"
+
+typedef struct _coords
+{
+    double lon;
+    double lat;
+    double alt;
+    _coords(double x,double y,double z)
+        :	lon(x),
+            lat(y),
+            alt(z)
+    {
+
+    }
+
+}Coords;
+
 
 struct SafeXc3DCityOperation;
 
@@ -66,8 +81,7 @@ public:
 	~Xc3DCity();
 
     
-protected:
-
+public:
      void addNode(osg::Switch* area);
 	 void removeNode(osg::Switch *area); 
 
@@ -118,9 +132,9 @@ public:
     virtual void run();
     virtual int cancel();
 
-    void setCityObject(Xc3DCity* city);
+    void setCityObject(Xc3DCity* city,osgEarth::MapNode* mapNode,std::string url);
 
-    //osg::LOD* createGeometry(osgEarth::MapNode* mapNode,const std::vector<Coords>& buildings);
+    osg::LOD* createGeometry(osgEarth::MapNode* mapNode,const std::vector<Coords>& buildings);
 
 
 
@@ -132,6 +146,8 @@ private:
     bool                                    _dirty;
 
     Xc3DCity*                           _city;
+    osgEarth::MapNode*        _mapNode;
+    std::string                           _url;
 };
 
 

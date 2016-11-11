@@ -50,12 +50,10 @@ OBJECTS_DIR   = ./
 
 SOURCES       = world.cc \
 		Xc3DCity.cc \
-		jsoncpp.cpp \
-		DataHandle.cpp 
+		jsoncpp.cpp 
 OBJECTS       = world.o \
 		Xc3DCity.o \
-		jsoncpp.o \
-		DataHandle.o
+		jsoncpp.o
 DIST          = /opt/Qt5.6.0/5.6/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt5.6.0/5.6/gcc_64/mkspecs/common/unix.conf \
 		/opt/Qt5.6.0/5.6/gcc_64/mkspecs/common/linux.conf \
@@ -190,11 +188,9 @@ DIST          = /opt/Qt5.6.0/5.6/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt5.6.0/5.6/gcc_64/mkspecs/features/lex.prf \
 		3DCity.pro Xc3DCity.h \
 		json/json.h \
-		json/json-forwards.h \
-		DataHandle.h world.cc \
+		json/json-forwards.h world.cc \
 		Xc3DCity.cc \
-		jsoncpp.cpp \
-		DataHandle.cpp
+		jsoncpp.cpp
 QMAKE_TARGET  = Result
 DESTDIR       = 
 TARGET        = Result
@@ -491,8 +487,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents Xc3DCity.h json/json.h json/json-forwards.h DataHandle.h $(DISTDIR)/
-	$(COPY_FILE) --parents world.cc Xc3DCity.cc jsoncpp.cpp DataHandle.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents Xc3DCity.h json/json.h json/json-forwards.h $(DISTDIR)/
+	$(COPY_FILE) --parents world.cc Xc3DCity.cc jsoncpp.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -529,20 +525,14 @@ compiler_clean:
 
 ####### Compile
 
-world.o: world.cc Xc3DCity.h \
-		DataHandle.h
+world.o: world.cc Xc3DCity.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o world.o world.cc
 
-Xc3DCity.o: Xc3DCity.cc Xc3DCity.h \
-		DataHandle.h
+Xc3DCity.o: Xc3DCity.cc Xc3DCity.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Xc3DCity.o Xc3DCity.cc
 
 jsoncpp.o: jsoncpp.cpp json/json.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o jsoncpp.o jsoncpp.cpp
-
-DataHandle.o: DataHandle.cpp DataHandle.h \
-		json/json.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o DataHandle.o DataHandle.cpp
 
 ####### Install
 
