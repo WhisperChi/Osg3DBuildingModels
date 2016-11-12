@@ -26,6 +26,7 @@
 #include <osgEarthUtil/ExampleResources>
 
 #include <osgEarthDrivers/gdal/GDALOptions>
+#include <osgEarthDrivers/tms/TMSOptions>
 #include <osgEarth/Map>
 #include <osgEarth/MapNode>
 
@@ -83,11 +84,16 @@ main(int argc, char** argv)
     comViewer->addView(&viewer);
 
     //Load Data
-    osgEarth::Drivers::GDALOptions gdal;
-    gdal.url() = "./resource/world.tif";
-
-    ImageLayer* baseLayer = new ImageLayer("baseLayer",gdal);
+    osgEarth::Drivers::TMSOptions tms;
+    tms.url()  = "http://readymap.org/readymap/tiles/1.0.0/7/";
+    ImageLayer* baseLayer = new ImageLayer("tmsLayer",tms);
     mapNode->getMap()->addImageLayer(baseLayer);
+
+    //gdal
+//    osgEarth::Drivers::GDALOptions gdal;
+//    gdal.url() = "./resource/world.tif";
+//    ImageLayer* baseLayer = new ImageLayer("baseLayer",gdal);
+//    mapNode->getMap()->addImageLayer(baseLayer);
 
 	root->addChild(node);
 	root->addChild(mapNode);
