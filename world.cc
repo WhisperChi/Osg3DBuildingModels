@@ -93,6 +93,7 @@ main(int argc, char** argv)
 	root->addChild(mapNode);
 
 	osg::ref_ptr<osg::Switch>					group = new osg::Switch();
+    root->addChild(group);
     Xc3DCity*       city = new Xc3DCity(comViewer,group);
     viewer.addEventHandler(new Xc3DCityHandler(group) );
     Xc3DCityThread* cityThread = Xc3DCityThread::Instance();

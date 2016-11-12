@@ -134,7 +134,9 @@ public:
 
     void setCityObject(Xc3DCity* city,osgEarth::MapNode* mapNode,std::string url);
 
-    osg::LOD* createGeometry(osgEarth::MapNode* mapNode,const std::vector<Coords>& buildings);
+    osg::LOD* createGeometry(osgEarth::MapNode* mapNode,const std::vector<Coords>& building);
+
+    void update();
 
 
 

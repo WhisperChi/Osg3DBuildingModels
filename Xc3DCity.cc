@@ -76,7 +76,6 @@ int parserJson(std::string fileName,std::vector<std::vector<Coords>>& buildings)
         if( reader.parse(in,root) )
         {
             Json::Value arr = root["features"];
-            std::cout<< "arr size" << arr.size() << std::endl;
             for(unsigned int i = 0; i < arr.size();i++)
             {
                 Json::Value coordsArr = arr[i]["geometry"]["coordinates"][0];
@@ -93,7 +92,11 @@ int parserJson(std::string fileName,std::vector<std::vector<Coords>>& buildings)
                 buildings.push_back(building);
             }
         }
+        else
+            return 2;
     }//End Parser
+
+    in.close();
 
     return 0;
 }
@@ -103,15 +106,14 @@ int parserJson(std::string fileName,std::vector<std::vector<Coords>>& buildings)
 /// \param path
 /// \param a
 ///
-void listDir(const char *path,std::vector<std::string>& a)
+void listDir(std::string path,std::vector<std::string>& files)
 {
     DIR              *pDir ;
     struct dirent    *ent  ;
     int               i=0  ;
-    char              childpath[512];
 
-    pDir=opendir(path);
-    memset(childpath,0,sizeof(childpath));
+    pDir=opendir(path.c_str());
+
 
     while((ent=readdir(pDir))!=NULL)
     {
@@ -122,24 +124,25 @@ void listDir(const char *path,std::vector<std::string>& a)
             if(strcmp(ent->d_name,".")==0 || strcmp(ent->d_name,"..")==0)
                 continue;
 
-            std::string b(path);
-            std::string c(ent->d_name);
-            std::string res =b + c;
-            childpath = res.c_str();
+            std::string tmp(ent->d_name);
+            std::string childpath = path + "/";
+            childpath += tmp;
 
-            listDir(childpath,a);
+            listDir(childpath,files);
 
         }
         else
         {
-            std::string b(path);
-            std::string c(ent->d_name);
-            std::string res =b + c;
-            a.push_back(res);
+            std::string a(path);
+            std::string b(ent->d_name);
+            std::string c = a + "/";
+            c+=b;
+            files.push_back(c);
         }
     }
 
 }
+
 
 
 /*
@@ -159,6 +162,7 @@ struct SafeXc3DCityOperation : public osg::Operation
 		//Add Nodes		
 		for(auto iter = _city->_safeAddNodes.begin();iter != _city->_safeAddNodes.end();iter++)
 		{
+            std::cout << "Can You See Me?\n" ;
 			_city->_group->addChild(*iter);
 		}	
 		_city->_safeAddNodes.clear();
@@ -237,7 +241,7 @@ bool Xc3DCityHandler::handle( const osgGA::GUIEventAdapter& ea,
                 {
                 case 0:
                 {
-                    osgEarth::Viewpoint vp("",121.922f,30.8864f,0.0f,57.8275f,-16.3616,5824.4f);
+                    osgEarth::Viewpoint vp("",120.27827f,31.52945f,0.0f,57.8275f,-16.3616,5824.4f);
                     ( (osgEarth::Util::EarthManipulator*)(viewer->getCameraManipulator()) )->setViewpoint(vp,3.0f);
                     _flag++;
                 }
@@ -284,27 +288,7 @@ void Xc3DCityThread::run()
     _dirty = true;
     do
     {
-        std::vector<std::string>    files;
-        listDir(_url.c_str(),files);
-        std::cout << "files num:" << files.size() << std::endl;
-
-        osg::Switch* area = new osg::Switch();
-        for(unsigned int i = 0;i < files.size();i++)
-        {
-            std::vector<std::vector<Coords>> buildings;
-            //std::cout << "file name:" << files[i] << std::endl;
-            parserJson(files[i],buildings);
-            //std::cout << "buildings num:" << buildings.size() << std::endl;
-            for(unsigned int j = 0;j < buildings.size();j++)
-            {
-                osg::LOD* tmp = createGeometry(_mapNode,buildings[j]);
-                area->addChild(tmp);
-            }
-        }
-        std::cout << area->getNumChildren() << std::endl;
-
-        _city->addNode(area);
-        _done = true;
+        update();
 
     }while(!_done);
 }
@@ -330,7 +314,7 @@ osg::LOD *Xc3DCityThread::createGeometry(osgEarth::MapNode* mapNode,const std::v
     if(buildings.size() == 0)
         return NULL;
 
-    osg::ref_ptr<osg::LOD>     lodNode = new osg::LOD();
+    osg::LOD*     lodNode = new osg::LOD();
 
     osgEarth::Symbology::Geometry*   geom = new osgEarth::Symbology::Polygon();
     osgEarth::Symbology::Style      geomStyle;
@@ -353,6 +337,39 @@ osg::LOD *Xc3DCityThread::createGeometry(osgEarth::MapNode* mapNode,const std::v
                         new osgEarth::Features::Feature(geom,geoSRS,geomStyle)
                         );
 
-    lodNode->addChild(node);
+    lodNode->addChild(node,0.0f,3000.0f);
     return lodNode;
+}
+
+void Xc3DCityThread::update()
+{
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_threadMutex);
+
+    //1.files
+    std::vector<std::string > files;
+    listDir(_url,files);
+
+    //2.data acquire
+    std::vector<std::vector<Coords>> buildings;
+    for(unsigned int i = 0;i < files.size();i++)
+    {
+        parserJson(files[i],buildings);
+    }
+
+    //3.create LODs
+    //   add into a Switch node
+    osg::Switch* group = new osg::Switch();
+    for(unsigned int i = 0;i < buildings.size();i++)
+    {
+        osg::LOD*   lod = createGeometry(_mapNode,buildings[i]);
+        group->addChild( lod);
+    }
+
+    std::cout << "buildings num :" << group->getNumChildren() << std::endl;
+
+    std::cout << "Before add" << std::endl;
+    _city->addNode(group);
+    std::cout << "After add" << std::endl;
+
+    _done = true;
 }
