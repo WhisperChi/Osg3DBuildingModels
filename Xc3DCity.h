@@ -116,6 +116,7 @@ public:
 private:
 	osg::Group* _group;
     int 				  _flag;
+    bool              _visiable;
 
 };
 
