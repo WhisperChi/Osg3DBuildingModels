@@ -54,17 +54,8 @@ usage(const char* name)
 int
 main(int argc, char** argv)
 {
-    osg::ArgumentParser arguments(&argc,argv);
-
-    // help?
-    if ( arguments.read("--help") )
-        return usage(argv[0]);
-
-    if ( arguments.read("--stencil") )
-        osg::DisplaySettings::instance()->setMinimumNumStencilBits( 8 );
-
     // create a viewer:
-    osgViewer::Viewer viewer(arguments);
+    osgViewer::Viewer viewer;
 
     // Tell the database pager to not modify the unref settings
     viewer.getDatabasePager()->setUnrefImageDataAfterApplyPolicy( false, false );
@@ -74,37 +65,36 @@ main(int argc, char** argv)
 
     // load an earth file, and support all or our example command-line options
     // and earth file <external> tags    
-    osg::Node* node = MapNodeHelper().load( arguments, &viewer );
 
-    osg::ref_ptr<osg::Group>										 	   root = new osg::Group();
-    osg::ref_ptr<osgEarth::Map>						               map = new osgEarth::Map();
-    osg::ref_ptr<osgEarth::MapNode>  			  		  mapNode = new osgEarth::MapNode(map);
-	osg::ref_ptr<osgViewer::CompositeViewer>   comViewer = new osgViewer::CompositeViewer();
+    osg::ref_ptr<osg::Group>				root = new osg::Group();
+    osg::ref_ptr<osgEarth::Map>				map = new osgEarth::Map();
+    osg::ref_ptr<osgEarth::MapNode>  			mapNode = new osgEarth::MapNode(map);
+    osg::ref_ptr<osgViewer::CompositeViewer>   	comViewer = new osgViewer::CompositeViewer();
 
     comViewer->addView(&viewer);
 
-    //Load Data
-    osgEarth::Drivers::TMSOptions tms;
-    tms.url()  = "http://readymap.org/readymap/tiles/1.0.0/7/";
-    ImageLayer* baseLayer = new ImageLayer("tmsLayer",tms);
-    mapNode->getMap()->addImageLayer(baseLayer);
-
-    //gdal
-//    osgEarth::Drivers::GDALOptions gdal;
-//    gdal.url() = "./resource/world.tif";
-//    ImageLayer* baseLayer = new ImageLayer("baseLayer",gdal);
+//    //Load Data
+//    osgEarth::Drivers::TMSOptions tms;
+//    tms.url()  = "http://readymap.org/readymap/tiles/1.0.0/7/";
+//    ImageLayer* baseLayer = new ImageLayer("tmsLayer",tms);
 //    mapNode->getMap()->addImageLayer(baseLayer);
 
-	root->addChild(node);
-	root->addChild(mapNode);
+    //gdal
+    osgEarth::Drivers::GDALOptions gdal;
+    gdal.url() = "./world.tif";
+    ImageLayer* baseLayer = new ImageLayer("baseLayer",gdal);
+    mapNode->getMap()->addImageLayer(baseLayer);
+
+    root->addChild(mapNode);
 
 	osg::ref_ptr<osg::Switch>					group = new osg::Switch();
     root->addChild(group);
+
     Xc3DCity*       city = new Xc3DCity(comViewer,group);
     viewer.addEventHandler(new Xc3DCityHandler(group) );
-    Xc3DCityThread* cityThread = Xc3DCityThread::Instance();
-    cityThread->setCityObject(city,mapNode,"./resource/15");
-    cityThread->startThread();
+    //Xc3DCityThread* cityThread = Xc3DCityThread::Instance();
+    //cityThread->setCityObject(city,mapNode,"./resource/15");
+    //cityThread->startThread();
 
     if ( root ) 
     {
