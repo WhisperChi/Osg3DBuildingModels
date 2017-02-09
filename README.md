@@ -1,4 +1,6 @@
-# Osg3DBuildingsModels
+# Osg3DBuildingModels
+
+Generate some 3D building models.
 
 ## Introduce
   
@@ -18,7 +20,7 @@
    Created for MacOS or Linux	
    
 ```sh
-	cd xxx/osg3DBuildingsModels
+	cd xxx/osg3DBuildingModels
 	make -f myMakefile
 	./world
 ```
