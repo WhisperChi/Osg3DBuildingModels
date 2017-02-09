@@ -7,11 +7,23 @@
   
 ## Src
 
-  Makefile  
-  world.cc  
-  Xc3DCity.h Xc3DCity.cc
-  
+*  Makefile  
+
+*  world.cc  
+
+*  Xc3DCity.h Xc3DCity.cc
+
+*  myMakefile
+
+   Created for MacOS or Linux	
+   
+```sh
+	cd xxx/osg3DBuildingsModels
+	make -f myMakefile
+	./world
+```
 
 ## Pic
 
 ![result.png](./pic/result.png)
+
