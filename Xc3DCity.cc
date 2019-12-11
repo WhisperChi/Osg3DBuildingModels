@@ -1,7 +1,6 @@
 #include "Xc3DCity.h"
 
 #include <osgEarth/MapNode>
-#include <osgEarth/Decluttering>
 #include <osgEarth/ECEF>
 
 #include <osgEarthUtil/EarthManipulator>
@@ -33,7 +32,7 @@
 
 #include <osg/OperationThread>
 
-#include <osgEarth/Pickers>
+#include <osgEarth/Picker>
 
 
 

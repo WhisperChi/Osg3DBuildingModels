@@ -5,7 +5,7 @@
 #include <string>
 
 #include <osgEarth/MapNode>
-#include <osgEarth/Decluttering>
+//#include <osgEarth/Decluttering>
 #include <osgEarth/ECEF>
 
 #include <osgEarthUtil/EarthManipulator>
@@ -36,7 +36,7 @@
 #include <osgGA/EventVisitor>
 #include <osgDB/WriteFile>
 
-#include <osgEarth/Pickers>
+#include <osgEarth/Picker>
 
 #include <osgGA/GUIEventAdapter>
 #include <osgGA/GUIEventHandler>

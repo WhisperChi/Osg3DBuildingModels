@@ -82,13 +82,13 @@ main(int argc, char** argv)
     //gdal
     osgEarth::Drivers::GDALOptions gdal;
     gdal.url() = "./world.tif";
-    ImageLayer* baseLayer = new ImageLayer("baseLayer",gdal);
-    mapNode->getMap()->addImageLayer(baseLayer);
+    //ImageLayer* baseLayer = new ImageLayer("baseLayer",gdal);
+    //mapNode->getMap()->addImageLayer(baseLayer);
 
-    root->addChild(mapNode);
+//    root->addChild(mapNode);
 
 	osg::ref_ptr<osg::Switch>					group = new osg::Switch();
-    root->addChild(group);
+ //   root->addChild(group);
 
     Xc3DCity*       city = new Xc3DCity(comViewer,group);
     viewer.addEventHandler(new Xc3DCityHandler(group) );
@@ -98,7 +98,8 @@ main(int argc, char** argv)
 
     if ( root ) 
     {
-        viewer.setSceneData( root );
+	viewer.setSceneData(osgDB::readNodeFile("gdal_tiff.earth"));
+        //viewer.setSceneData( root );
 
         viewer.getCamera()->setNearFarRatio(0.00002);
         viewer.getCamera()->setSmallFeatureCullingPixelSize(-1.0f);
